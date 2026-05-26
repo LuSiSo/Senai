@@ -4,6 +4,8 @@ using UnityEngine.Rendering; // Importante para o novo Input System
 
 public class PlayerAttack : MonoBehaviour
 {
+    private PlayerController playerController;
+
     [Header("Configurações de Ataque")]
     public Transform attackPoint; // Objeto vazio (filho do player) que define o centro do golpe
     public float attackRange = 0.5f; // Raio do círculo de alcance do golpe
@@ -16,6 +18,12 @@ public class PlayerAttack : MonoBehaviour
     [Header("Configurações de Cooldown")]
     public float ataqueCooldown = 0.5f;   // Tempo de espera entre os ataques (ex: meio segundo)
     private float tempoUltimoAtaque = 0f; // Guarda o tempo em que o jogador atacou pela última vez
+
+    void Start()
+    {
+        playerController = GetComponent<PlayerController>();
+    }
+
 
     // Esta função será chamada automaticamente pelo Player Input (adicione a ação "Attack" lá)
     public void OnAttack(InputValue value)
@@ -31,36 +39,38 @@ public class PlayerAttack : MonoBehaviour
 
     void Attack()
     {
-        // Medida de segurança: se esquecer de arrastar o AttackPoint na Unity, o código não trava o jogo
         if (attackPoint == null) return;
 
-        // Toca animação (descomente quando tiver)
-        // animator.SetTrigger("Attack");
-
-        // Cria uma esfera invisível que detecta todos os colisores da "enemyLayers" dentro do raio
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
 
-        // Varre a lista de tudo o que foi atingido pelo ataque
         foreach (Collider2D enemyCollider in hitEnemies)
         {
-            // SEGURANÇA: Tenta pegar o script Enemy
             Enemy enemy = enemyCollider.GetComponent<Enemy>();
 
-            // Só dá dano se o objeto realmente tiver o script Enemy
             if (enemy != null)
             {
-                // 1. Aplica o dano à vida do inimigo
-                enemy.TakeDamage(damage);
+                // CALCULA O DANO COM BUFFS CONDICIONAIS
+                int danoFinal = damage;
 
-                // 2. CALCULO DO KNOCKBACK: Subtrai a posição do Player da posição do Inimigo.
-                // Isso gera um vetor/seta apontando exatamente na direção oposta ao Player.
+                if (playerController != null)
+                {
+                    // Checa se tem o Amuleto do Guerreiro Antigo E a vida está cheia
+                    if (playerController.TemItemEquipado(TipoItem.AmuletoGuerreiroAntigo) && playerController.TemVidaCheia())
+                    {
+                        // O item diz: "Aumenta o dano de 20 para 30". 
+                        // Se o player já tiver outros buffs (ex: Medalhão), adicionamos a diferença (+10) 
+                        // ou forçamos o valor. Somar +10 preserva os outros buffs acumulados!
+                        danoFinal += 10;
+                    }
+                }
+
+                Debug.Log($"Player causa {danoFinal} de dano ao inimigo '{enemy.name}'.");
+                // 1. Aplica o dano calculado à vida do inimigo
+                enemy.TakeDamage(danoFinal);
+
+                // 2. CÁLCULO DO KNOCKBACK (Mantenha o seu código original aqui...)
                 Vector2 direcao = (enemyCollider.transform.position - transform.position).normalized;
-
-                // Ajuste opcional: força o empurrão a ser predominantemente horizontal e adiciona 
-                // um leve valor em Y (0.2f) para fazer o inimigo levantar um pouco do chão ao ser atingido
-                direcao = new Vector2(Mathf.Sign(direcao.x), 0.2f).normalized; // 0.2f dá um leve empurrão no inimigo
-
-                // 3. Envia a direção calculada e a intensidade da força para o script do inimigo
+                direcao = new Vector2(Mathf.Sign(direcao.x), 0.2f).normalized;
                 enemy.TomarKnockback(direcao, knockbackForca);
             }
         }
