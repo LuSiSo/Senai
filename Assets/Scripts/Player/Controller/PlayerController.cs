@@ -2,14 +2,9 @@ using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.Tilemaps;
-using UnityEditor.XR;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using static UnityEditor.Progress;
-
 
 public class PlayerController : MonoBehaviour
 {
@@ -71,7 +66,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Inventário de Buffs")]
     // Lista contendo os itens que o jogador coletou e estão ativos
-    public List<Item> itensEquipados = new List<Item>();
+    public List<ItemData> itensEquipados = new List<ItemData>(); 
+    private PlayerAttack playerAttack;
 
     private Rigidbody2D rb;
 
@@ -79,6 +75,8 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         // Inicializa a vida do player com o valor máximo (do Script 1)
+        playerAttack = GetComponent<PlayerAttack>(); // Garante o acesso ao dano
+
         vidaAtual = vidaMaxima;
 
         if (barra != null)
@@ -87,6 +85,71 @@ public class PlayerController : MonoBehaviour
         }
 
         UpdateLifeUI();
+    }
+
+    // FUNÇÃO QUE O ITEMCOLETAVEL VAI CHAMAR
+    public void ColetarItem(ItemData item)
+    {
+        itensEquipados.Add(item);
+        Debug.Log($"Coletou: {item.nomeItem} ({item.raridade})");
+
+        // Aplica o efeito baseado no tipo do item
+        switch (item.tipoItem)
+        {
+            case TipoItem.FragmentoSombrio:
+                Curar(30f);
+                break;
+
+            case TipoItem.MedalhaoFuriaAntiga:
+                // Aumenta o dano base de 20 para 25 (ou simplesmente soma +5)
+                if (playerAttack != null) playerAttack.damage += 5;
+                break;
+
+            case TipoItem.RelicarioIra:
+                // Diminui o cooldown do dash de 3f para 1.5f
+                dashCooldown = 1.5f;
+                break;
+
+            case TipoItem.AmuletoGuerreiroAntigo:
+                // A lógica condicional será checada direto no script PlayerAttack (veja abaixo)
+                break;
+
+            case TipoItem.AnelEclipse:
+                // Sobe a vida máxima de 100 para 130
+                vidaMaxima += 30f;
+                if (barra != null) barra.ColocarVidaMaxima(vidaMaxima);
+
+                // Cura o jogador em 30 pelo aumento da vida máxima (opcional)
+                Curar(30f);
+
+                // Fica com 30 de ataque base (se o dano base era 20, soma +10)
+                if (playerAttack != null) playerAttack.damage += 10;
+                break;
+        }
+
+        UpdateLifeUI();
+    }
+
+    // Função auxiliar para curar o jogador
+    public void Curar(float quantidade)
+    {
+        vidaAtual += quantidade;
+        if (vidaAtual > vidaMaxima) vidaAtual = vidaMaxima;
+
+        if (barra != null) barra.AlterarVida(vidaAtual);
+        UpdateLifeUI();
+    }
+
+    // Função auxiliar para o script de ataque saber se a vida está cheia
+    public bool TemVidaCheia()
+    {
+        return vidaAtual >= vidaMaxima;
+    }
+
+    // Função auxiliar para verificar se o player tem um item específico equipado
+    public bool TemItemEquipado(TipoItem tipo)
+    {
+        return itensEquipados.Exists(i => i.tipoItem == tipo);
     }
 
     // Update is called once per frame
@@ -125,6 +188,7 @@ public class PlayerController : MonoBehaviour
         {
             Flip();
         }
+
     }
 
     void FixedUpdate()
@@ -309,7 +373,5 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(dashCooldown);
         canDash = true; // Volta a ser verdadeira
     }
-
-
 }
 
