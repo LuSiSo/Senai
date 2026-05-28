@@ -8,19 +8,19 @@ Aqui estão armazenados os elementos visuais, sonoros, mecânicos e estruturais 
 
 # Estrutura
 
-## Animations/
+## Animations
 
 Animações utilizadas por personagens, inimigos e elementos do jogo.
 
 ---
 
-## Animator/
+## Animator
 
 Animator Controllers e configurações de estados de animação.
 
 ---
 
-## Art/
+## Art
 
 Conteúdo visual e artístico do projeto.
 
@@ -34,55 +34,55 @@ Inclui:
 
 ---
 
-## Fonts/
+## Fonts
 
 Fontes utilizadas na interface e identidade visual.
 
 ---
 
-## Music/
+## Music
 
 Trilhas sonoras e músicas do jogo.
 
 ---
 
-## Prefabs/
+## Prefabs
 
 Objetos reutilizáveis configurados dentro da Unity.
 
 ---
 
-## Resources/
+## Resources
 
 Arquivos carregados dinamicamente pela Unity.
 
 ---
 
-## SFX/
+## SFX
 
 Efeitos sonoros do projeto.
 
 ---
 
-## Scenes/
+## Scenes
 
 Cenas e mapas jogáveis do jogo.
 
 ---
 
-## Scripts/
+## Scripts
 
 Scripts responsáveis pela lógica e sistemas do projeto.
 
 ---
 
-## Sprites/
+## Sprites
 
 Sprites utilizados por personagens, inimigos, UI e objetos.
 
 ---
 
-## Tiles/
+## Tiles
 
 Tilesets e elementos de construção dos cenários.
 
