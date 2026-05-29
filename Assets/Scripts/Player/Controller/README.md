@@ -1,24 +1,28 @@
 # Controller
 
-Esta pasta contém os scripts responsáveis pelo controle do jogador.
+Esta pasta contém scripts responsáveis pelo controle do jogador.
 
-## Scripts Atuais
+---
 
-* PlayerController.cs → movimentação principal
-* PlayerAnimation.cs → controle de animações
+# Inclui
 
-## Mecânicas
-
+* movimentação
 * corrida
+* pulo
 * wall jump
 * dash
-* coyote time
+* animações
+* física do player
 
-## Regras
+---
 
-* não adicionar combate aqui
-* scripts devem controlar apenas movimentação e estado do player
+# Scripts Atuais
 
-## Objetivo
+* PlayerAnimation
+* PlayerController
 
-Centralizar toda lógica de controle do personagem principal.
+---
+
+# Objetivo
+
+Centralizar toda lógica de movimentação e comportamento principal do protagonista.
