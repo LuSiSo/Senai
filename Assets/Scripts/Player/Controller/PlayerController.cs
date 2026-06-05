@@ -60,21 +60,21 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // ===== GROUND =====
+        // ===== GROUND CHECK =====
         isGrounded = Physics2D.OverlapCircle(
             groundCheck.position,
             groundCheckRadius,
             groundLayer
         );
 
-        // ===== WALL DETECT =====
+        // ===== WALL CHECK =====
         isWallTouch = Physics2D.OverlapCircle(
             wallCheck.position,
             0.2f,
             wallLayer
         );
 
-        // ===== COYOTE =====
+        // ===== COYOTE TIME =====
         if (isGrounded)
             coyoteTimeCounter = coyoteTime;
         else
@@ -83,24 +83,27 @@ public class PlayerController : MonoBehaviour
         // ===== WALL SLIDE =====
         isWallSliding = isWallTouch && !isGrounded && rb.linearVelocity.y < 0;
 
-        // ===== DIREÇÃO REAL =====
+        // ===== DIREÇÃO =====
         if (rb.linearVelocity.x > 0.1f)
             facingDirection = 1f;
         else if (rb.linearVelocity.x < -0.1f)
             facingDirection = -1f;
 
-        // ===== FLIP (CORRETO E ESTÁVEL) =====
+        // ===== FLIP =====
         if (spriteRenderer != null)
             spriteRenderer.flipX = facingDirection < 0f;
 
-        // ===== WALLCHECK SEGUE DIREÇÃO =====
+        // ===== WALL CHECK SEGUE DIREÇÃO =====
         if (wallCheck != null)
-        {
             wallCheck.position = transform.position + new Vector3(0.5f * facingDirection, 0, 0);
-        }
 
-        // Animator
-        animator.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
+        // ===== ANIMAÇÃO =====
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
+            animator.SetFloat("VerticalSpeed", rb.linearVelocity.y);
+            animator.SetBool("IsGrounded", isGrounded);
+        }
     }
 
     void FixedUpdate()
@@ -112,7 +115,6 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity.y
         );
 
-        // Wall slide limit
         if (isWallSliding)
         {
             if (rb.linearVelocity.y < -wallSlideSpeed)
@@ -136,13 +138,11 @@ public class PlayerController : MonoBehaviour
     {
         if (!value.isPressed) return;
 
-        // normal jump
         if (coyoteTimeCounter > 0f)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             coyoteTimeCounter = 0f;
         }
-        // wall jump
         else if (isWallSliding)
         {
             WallJump();
